@@ -1,0 +1,20 @@
+.d-flex-cc{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.d-flex-cb{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.d-flex-cs{
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+.d-flex-ec{
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+}

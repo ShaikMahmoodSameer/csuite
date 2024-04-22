@@ -1,0 +1,35 @@
+.txtClrPrimary{ color: var(--clr1) }
+.txtClrSecondary{ color: var(--clr2) }
+.txtClr { color: var(--text) }
+.txtClrLight1{ color: #ffffffb9; }
+.textPrimary {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.3em;
+}
+.textSecondary {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.5em;
+}
+.text {
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 1.5em;
+}
+.textAccent {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.4em;
+}
+
+p {
+  color: var(--text);
+  font-weight: 300;
+  line-height: 1.5rem;
+  margin-bottom: 10px !important;
+  font-size: 16px;
+  font-weight: 300;
+}
+
+.xsmall{ font-size: 12px; }

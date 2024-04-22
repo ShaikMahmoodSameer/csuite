@@ -21,7 +21,7 @@ const TktFooterSec = ({ tktInfo, rzpPmtId, setRzpPmtId }) => {
     }, [tktInfo.payment_id, setRzpPmtId]);    
 
     return (
-        <div className='px-3 py-2'>
+        <div className='py-2'>
             {/* <p className="xsmall mb-0 text-muted fw-medium">
                 <span>Reciept no: </span>
                 <span>#ntcsrcpt0001 </span>
