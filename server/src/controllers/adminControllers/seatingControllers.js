@@ -1,5 +1,6 @@
 const seatingServices = require('../../services/adminServices/seatingServices');
-const { handleError } = require('../../utils/handleError');
+const { handleError, handleErrorLog } = require('../../utils/handleError');
+const { sendWtspSeatingTblAssigned } = require('../../utils/sendWtspSeatingTblAssigned');
 
 const getSeatingTables = (req, res) => {
     seatingServices.getSeatingTables((error, response) => {
@@ -33,6 +34,26 @@ const addGuestsToSeatingTable = (req, res) => {
         if (error) return handleError("Error adding guests to seating table: ", res, error);
 
         if (response){
+            response.map(async (item, idx) => {
+                const {insertId} = item;
+                try {
+                    const GIRes = await seatingServices.getTblGuestInfo(insertId);
+                    if(GIRes){
+                        const { mobile_number, bnf_name, ticket_number, seating_table_id, seat_no, seat } = GIRes[0];
+                        await sendWtspSeatingTblAssigned({
+                            userMobileNumber: mobile_number,
+                            ticketQrImageLink: "https://nutrifycsuite.com/images/scanner_img.jpg",
+                            ticketNumber: ticket_number,
+                            name: bnf_name,
+                            tableNo: seating_table_id,
+                            seatNo: seat_no,
+                            fullSeat: seat
+                        });
+                    }
+                } catch (err) {
+                    return handleErrorLog("Error adding guests to seating table: ", err);
+                }
+            })
             res.status(200).json({Status: "Success"});
         }
     })
@@ -70,6 +91,26 @@ const addGuestsToSeatingSofa = (req, res) => {
         if (error) return handleError("Error adding guests to seating sofa: ", res, error);
 
         if (response){
+            response.map(async (item, idx) => {
+                const { insertId } = item;
+                try {
+                    const GIRes = await seatingServices.getSofaGuestInfo(insertId);
+                    if(GIRes){
+                        const { mobile_number, bnf_name, ticket_number, seating_sofa_no, seat_no, seat } = GIRes[0];
+                        await sendWtspSeatingTblAssigned({
+                            userMobileNumber: mobile_number,
+                            ticketQrImageLink: "https://nutrifycsuite.com/images/scanner_img.jpg",
+                            ticketNumber: ticket_number,
+                            name: bnf_name,
+                            tableNo: seating_sofa_no,
+                            seatNo: seat_no,
+                            fullSeat: seat
+                        });
+                    }
+                } catch (err) {
+                    return handleErrorLog("Error adding guests to seating sofa: ", err);
+                }
+            })
             res.status(200).json({Status: "Success"});
         }
     })

@@ -4,17 +4,15 @@ require('dotenv').config();
 const phoneId = process.env.WTSP_PHONE_NUMBER_ID;
 const accessTokenKey = process.env.WTSP_PERM_ACCESS_TOKEN_KEY;
 
-async function sendWtspSeatingTblAssigned(msgData) {
-  const {userMobileNumber, ticketQrImageLink, ticketNumber, name, tableNo, seatNo, fullSeat} = msgData;
-  console.log(msgData);
-  
+async function sendWtspMeetingTblAssigned(msgData) {
+  const { userMobileNumber, ticketQrImageLink, ticketNumber, name, otherMembers, tblRoom, tableNo, session } = msgData;
 
   const data = {
     messaging_product: 'whatsapp',
     to: `91${userMobileNumber}`,
     type: 'template',
     template: {
-      name: 'seating_table_booking',
+      name: 'meeting_table_booking',
       language: { code: 'en_US' },
       components: [
         {
@@ -27,9 +25,10 @@ async function sendWtspSeatingTblAssigned(msgData) {
           type: 'body',
           parameters: [
             { type: 'text', text: name },
-            { type: 'text', text: fullSeat },
+            { type: 'text', text: otherMembers },
+            { type: 'text', text: tblRoom },
             { type: 'text', text: tableNo },
-            { type: 'text', text: seatNo }
+            { type: 'text', text: session }
           ],
         },
       ],
@@ -47,14 +46,19 @@ async function sendWtspSeatingTblAssigned(msgData) {
         },
       }
     );
-    // if (response) {
-    //   callback(null, { Status: "Success", Message: "Message sent successfully!" })
-    // }
+    // console.log("Message sent successfully!");
+    return { Status: "Success", Message: "Message sent successfully!" };
   } catch (error) {
-    console.error(error);
+    console.error("Error sending message:", error);
+    return { Status: "Error", Message: "Error sending message" };
   }
 }
+
+module.exports = {
+  sendWtspMeetingTblAssigned
+}
+
   
 module.exports = {
-    sendWtspSeatingTblAssigned
+  sendWtspMeetingTblAssigned
 }

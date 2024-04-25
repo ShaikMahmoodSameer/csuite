@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { styled } from 'styled-components';
 import MeetingTblPopup from '../Components/Popups/MeetingTblPopup';
-import { addMtngTable, fetchMeetingTables } from '../utils/meetingTableUtils';
+import { addMtngTbl, fetchMtngTbls } from '../utils/meetingTableUtils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import MtngTblBox from '../Components/MeetingComponents/MtngTblBox';
@@ -10,17 +10,21 @@ function Meetings() {
   const [meetingTables, setMeetingTables] = useState([]);
   const [MeetingRoomPopupShow, setMeetingRoomPopupShow] = useState(false);
   const [selectedMeetinTable, setSelectedMeetinTable] = useState(null);
+  const [isAddingMeetingTable, setIsAddingMeetingTable] = useState(false);
 
-  const handleAddNewMtngTbl = () => {
+  const handleAddNewMtngTbl = async () => {
+    setIsAddingMeetingTable(true);
     const isConfirmed = window.confirm(`Confirm Adding new Meeting Table "Meeting Table ${meetingTables.length + 1}"`);
     if (!isConfirmed) {
+      setIsAddingMeetingTable(false);
       return;
     } else {
-      addMtngTable(meetingTables, setMeetingTables);
+      await addMtngTbl(meetingTables, setMeetingTables);
+      setIsAddingMeetingTable(false);
     }
   };
 
-  useEffect(() => { fetchMeetingTables(setMeetingTables); }, []);
+  useEffect(() => { fetchMtngTbls(setMeetingTables); }, []);
 
   return (
     <Wrapper>
@@ -39,8 +43,8 @@ function Meetings() {
         }
 
         <div className="AddTableBox w-100 d-flex-cc">
-          <button className="btn btn-outline-dark" onClick={handleAddNewMtngTbl}>
-            Add Meeting Table <FontAwesomeIcon icon={faPlus} className='ms-4' />
+          <button className="btn btn-outline-dark" onClick={handleAddNewMtngTbl} disabled={isAddingMeetingTable}>
+            {isAddingMeetingTable ? 'Adding Meeting Table...' : 'Add Meeting Table'} <FontAwesomeIcon icon={faPlus} className='ms-4' />
           </button>
         </div>
       </div>

@@ -4,39 +4,35 @@ import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import Chip from '@mui/material/Chip';
 import Button from '@mui/material/Button';
-import axios from 'axios';
-import BASE_URL from '../../config/apiConfig';
+import { addGuestsToMtngTblSess, fetchTblSessGuests } from '../../utils/meetingTableUtils';
 
-function AddGuestsToMtngTblInpField({ fetchTableGuests, tableNumber, tblGuests, setTblGuests, allGuests, session }) {
+function AddGuestsToMtngTblInpField({ tableNumberId, tableNumber, tblSesnGuests, setTblSesnGuests, allGuests, session }) {
     const [selectedGuests, setSelectedGuests] = useState([]);
-    // const [unseatedGuests, setUnseatedGuests] = useState([]);
-
-    // useEffect(() => { fetchUnseatedGuests(setUnseatedGuests) }, [])
+    const [isAddingGuests, setIsAddingGuests] = useState(false);
 
     const handleGuestChange = (_, selectedOptions) => {
         setSelectedGuests(selectedOptions);
     };
 
     const handleSubmitGuests = () => {
-        const addSelectedGuestsToTable = async () => {
-            try {
-                const response = await axios.post(`${BASE_URL}/admin/meetings/add-guests-to-table`, {
-                    params: {
-                        selectedGuests: selectedGuests,
-                        tableNumber: tableNumber,
-                        session: session
-                    }
-                });
-                if (response.data.Status === "Success") {
-                    fetchTableGuests(tableNumber, setTblGuests);
-                    setTblGuests([]);
-                }
-            } catch (error) { console.log(error); }
+        setIsAddingGuests(true);
+        const newGData = {
+            selectedGuests: selectedGuests, 
+            tableNumberId : tableNumberId, 
+            tableNumber : tableNumber, 
+            session: session
         }
-        addSelectedGuestsToTable();
-    };
+        
+        addGuestsToMtngTblSess(newGData).then(status => {
+            if (status === 200) {
+                setSelectedGuests([]);
+                fetchTblSessGuests({tblNo: tableNumber, session}, setTblSesnGuests);
+            } else { console.log(status) }
+            setIsAddingGuests(false);
+        });
+    };    
 
-    const filteredGuests = allGuests.filter((option) => !selectedGuests.includes(option) && !tblGuests.some((member) => member.bnf_name === option.bnf_name));
+    const filteredGuests = allGuests.filter((option) => !selectedGuests.includes(option) && !tblSesnGuests.some((member) => member.bnf_name === option.bnf_name));
     
     return (
         <Wrapper>
@@ -72,10 +68,10 @@ function AddGuestsToMtngTblInpField({ fetchTableGuests, tableNumber, tblGuests, 
                 ))}
             </div>
 
-            <Button variant="contained" className='mt-3' onClick={handleSubmitGuests}>
+            <Button variant="contained" className='mt-3' onClick={handleSubmitGuests} disabled={isAddingGuests}>
                 Add Guests to Meeting Table {tableNumber} ( {session} )
             </Button>
-            <p className="xsmall"> Adds selected guests to the table and sends seating detaials to guest on whatsapp... </p>
+            <p className="xsmall"> Adds selected guests to the table and sends seating details to guests on WhatsApp... </p>
         </Wrapper>
     );
 }

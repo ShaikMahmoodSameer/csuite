@@ -1,10 +1,10 @@
 import React from 'react';
-import EmailSelectorMui from '../Components/TestComponents/EmailSelectorMUI';
+import EnhancedTable from '../Components/TestComponents/EnhancedTable';
 
 export default function TestPage() {
   return (
     <div>
-    <EmailSelectorMui />
+    <EnhancedTable />
     </div>
   )
 }

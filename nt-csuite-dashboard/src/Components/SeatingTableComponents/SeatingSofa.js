@@ -21,7 +21,6 @@ function SeatingSofa({ sofa }) {
     const fetchSofaGuests = async (seatingSofaId) => {
         try {
             const response = await axios.get(`${BASE_URL}/admin/seatings/sofa-guests/${seatingSofaId}`);
-            console.log(response.data);
             setSofaMembers(response.data);
         } catch (error) { console.log(error); }
     }
