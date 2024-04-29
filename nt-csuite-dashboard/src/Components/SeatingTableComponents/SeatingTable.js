@@ -64,7 +64,7 @@ function SeatingTable({ item, index }) {
                         {
                             tableMembers.length < item.no_of_seats ?
                                 <div className="addingMemInpField p-4">
-                                    <AddingMemInpField fetchTableGuests={fetchTableGuests} tableMaxSeats={item.no_of_seats} tableNumber={item.seating_table_id} tableMembers={tableMembers} allGuests={allGuests} />
+                                    <AddingMemInpField fetchTableGuests={fetchTableGuests} tableMaxSeats={item.no_of_seats} tableNumber={item.seating_table_id} tableNo={item.table_no} tableMembers={tableMembers} allGuests={allGuests} />
                                 </div>
                                 :
                                 ""

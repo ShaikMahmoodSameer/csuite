@@ -14,6 +14,7 @@ export const addSeatingTable = async (seatingTables, setSeatingTables) => {
   try {
     const response = await axios.post(`${BASE_URL}/admin/seatings/add-seating-table`, {
       tableNumber: `Table ${seatingTables.length + 1}`,
+      tableNo: seatingTables.length + 1,
       noOfSeats: 8,
     });
     if (response.data.Status === 'Success') {

@@ -32,12 +32,14 @@ const couponRoutes = require('./src/routes/couponRoutes');
 const orderRoutes = require('./src/routes/orderRoutes');
 const ticketRoutes = require('./src/routes/ticketRoutes');
 const adminRoutes = require('./src/routes/adminRoutes');
+const adminAuthRoutes = require('./src/routes/adminAuthRoutes')
 app.use('/user', userRoutes);
 app.use('/payments', paymentRoutes);
 app.use('/coupons', couponRoutes);
 app.use('/orders', orderRoutes);
 app.use('/ticket', ticketRoutes);
 app.use('/admin', adminRoutes);
+app.use('/admin-auth', adminAuthRoutes);
 
 // ------------------------------------------------------------
 app.get('/', (req, res) => {

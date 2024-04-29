@@ -21,41 +21,15 @@ import Switch from '@mui/material/Switch';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { visuallyHidden } from '@mui/utils';
-
-function createData(id, name, calories, fat, carbs, protein) {
-    return {
-        id,
-        name,
-        calories,
-        fat,
-        carbs,
-        protein,
-    };
-}
-
-const rows = [
-    createData(1, 'Cupcake', 305, 3.7, 67, 4.3),
-    createData(2, 'Donut', 452, 25.0, 51, 4.9),
-    createData(3, 'Eclair', 262, 16.0, 24, 6.0),
-    createData(4, 'Frozen yoghurt', 159, 6.0, 24, 4.0),
-    createData(5, 'Gingerbread', 356, 16.0, 49, 3.9),
-    createData(6, 'Honeycomb', 408, 3.2, 87, 6.5),
-    createData(7, 'Ice cream sandwich', 237, 9.0, 37, 4.3),
-    createData(8, 'Jelly Bean', 375, 0.0, 94, 0.0),
-    createData(9, 'KitKat', 518, 26.0, 65, 7.0),
-    createData(10, 'Lollipop', 392, 0.2, 98, 0.0),
-    createData(11, 'Marshmallow', 318, 0, 81, 2.0),
-    createData(12, 'Nougat', 360, 19.0, 9, 37.0),
-    createData(13, 'Oreo', 437, 18.0, 63, 4.0),
-];
+import axios from 'axios';
+import BASE_URL from '../../config/apiConfig';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChair, faHandshake, faInfo } from '@fortawesome/free-solid-svg-icons';
+import { Collapse } from '@mui/material';
 
 function descendingComparator(a, b, orderBy) {
-    if (b[orderBy] < a[orderBy]) {
-        return -1;
-    }
-    if (b[orderBy] > a[orderBy]) {
-        return 1;
-    }
+    if (b[orderBy] < a[orderBy]) { return -1; }
+    if (b[orderBy] > a[orderBy]) { return 1; }
     return 0;
 }
 
@@ -91,38 +65,37 @@ const headCells = [
     {
         label: 'Company',
         id: 'company',
-        numeric: true,
+        numeric: false,
         disablePadding: false,
     },
     {
         label: 'Designation',
         id: 'designation',
-        numeric: true,
+        numeric: false,
         disablePadding: false,
     },
     {
         label: 'Ticket No',
         id: 'ticket_no',
-        numeric: true,
+        numeric: false,
         disablePadding: false,
     },
     {
-        label: ' ',
+        label: 'Action',
         id: 'action',
-        numeric: true,
-        disablePadding: true,
+        numeric: false,
+        disablePadding: false,
     },
 ];
 
-function EnhancedTableHead(props) {
-    const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } =
-        props;
+function TicketsTableHead(props) {
+    const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
     const createSortHandler = (property) => (event) => {
         onRequestSort(event, property);
     };
 
     return (
-        <TableHead>
+        <TableHead className='bg-light'>
             <TableRow>
                 <TableCell padding="checkbox">
                     <Checkbox
@@ -161,7 +134,7 @@ function EnhancedTableHead(props) {
     );
 }
 
-EnhancedTableHead.propTypes = {
+TicketsTableHead.propTypes = {
     numSelected: PropTypes.number.isRequired,
     onRequestSort: PropTypes.func.isRequired,
     onSelectAllClick: PropTypes.func.isRequired,
@@ -170,7 +143,7 @@ EnhancedTableHead.propTypes = {
     rowCount: PropTypes.number.isRequired,
 };
 
-function EnhancedTableToolbar(props) {
+function TicketsTableToolbar(props) {
     const { numSelected } = props;
 
     return (
@@ -221,17 +194,30 @@ function EnhancedTableToolbar(props) {
     );
 }
 
-EnhancedTableToolbar.propTypes = {
+TicketsTableToolbar.propTypes = {
     numSelected: PropTypes.number.isRequired,
 };
 
-export default function EnhancedTable() {
+export default function TicketsTable() {
     const [order, setOrder] = React.useState('asc');
     const [orderBy, setOrderBy] = React.useState('calories');
     const [selected, setSelected] = React.useState([]);
     const [page, setPage] = React.useState(0);
-    const [dense, setDense] = React.useState(false);
-    const [rowsPerPage, setRowsPerPage] = React.useState(5);
+    const [dense, setDense] = React.useState(true);
+    const [rowsPerPage, setRowsPerPage] = React.useState(10);
+
+    const [ticketsData, setTicketsData] = React.useState([])
+    React.useEffect(() => {
+        const fetchAllTickets = async () => {
+            try {
+                const response = await axios.get(`${BASE_URL}/ticket`);
+                setTicketsData(response.data);
+            } catch (error) {
+                console.log(error);
+            }
+        }
+        fetchAllTickets();
+    }, [setTicketsData])
 
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
@@ -241,7 +227,7 @@ export default function EnhancedTable() {
 
     const handleSelectAllClick = (event) => {
         if (event.target.checked) {
-            const newSelected = rows.map((n) => n.id);
+            const newSelected = ticketsData.map((n) => n.id);
             setSelected(newSelected);
             return;
         }
@@ -284,81 +270,52 @@ export default function EnhancedTable() {
 
     // Avoid a layout jump when reaching the last page with empty rows.
     const emptyRows =
-        page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+        page > 0 ? Math.max(0, (1 + page) * rowsPerPage - ticketsData.length) : 0;
 
     const visibleRows = React.useMemo(
         () =>
-            stableSort(rows, getComparator(order, orderBy)).slice(
+            stableSort(ticketsData, getComparator(order, orderBy)).slice(
                 page * rowsPerPage,
                 page * rowsPerPage + rowsPerPage,
             ),
-        [order, orderBy, page, rowsPerPage],
+        [order, orderBy, page, rowsPerPage, ticketsData],
     );
 
     return (
         <Box sx={{ width: '100%' }}>
             <Paper sx={{ width: '100%', mb: 2 }}>
-                <EnhancedTableToolbar numSelected={selected.length} />
+                <TicketsTableToolbar numSelected={selected.length} />
                 <TableContainer>
                     <Table
                         sx={{ minWidth: 750 }}
                         aria-labelledby="tableTitle"
                         size={dense ? 'small' : 'medium'}
                     >
-                        <EnhancedTableHead
+                        <TicketsTableHead
                             numSelected={selected.length}
                             order={order}
                             orderBy={orderBy}
                             onSelectAllClick={handleSelectAllClick}
                             onRequestSort={handleRequestSort}
-                            rowCount={rows.length}
+                            rowCount={ticketsData.length}
                         />
                         <TableBody>
                             {visibleRows.map((row, index) => {
-                                const isItemSelected = isSelected(row.id);
+                                const isItemSelected = isSelected(row.ticket_id);
                                 const labelId = `enhanced-table-checkbox-${index}`;
 
                                 return (
-                                    <TableRow
-                                        hover
-                                        onClick={(event) => handleClick(event, row.id)}
-                                        role="checkbox"
-                                        aria-checked={isItemSelected}
-                                        tabIndex={-1}
-                                        key={row.id}
-                                        selected={isItemSelected}
-                                        sx={{ cursor: 'pointer' }}
-                                    >
-                                        <TableCell padding="checkbox">
-                                            <Checkbox
-                                                color="primary"
-                                                checked={isItemSelected}
-                                                inputProps={{
-                                                    'aria-labelledby': labelId,
-                                                }}
-                                            />
-                                        </TableCell>
-                                        <TableCell
-                                            component="th"
-                                            id={labelId}
-                                            scope="row"
-                                            padding="none"
-                                        >
-                                            {row.name}
-                                        </TableCell>
-                                        <TableCell align="right">{row.calories}</TableCell>
-                                        <TableCell align="right">{row.fat}</TableCell>
-                                        <TableCell align="right">{row.carbs}</TableCell>
-                                        <TableCell align="right">{row.protein}</TableCell>
-                                    </TableRow>
+                                    <TicketRow
+                                        key={index}
+                                        row={row}
+                                        handleClick={handleClick}
+                                        isItemSelected={isItemSelected}
+                                        labelId={labelId}
+                                    />
                                 );
                             })}
                             {emptyRows > 0 && (
-                                <TableRow
-                                    style={{
-                                        height: (dense ? 33 : 53) * emptyRows,
-                                    }}
-                                >
+                                <TableRow style={{ height: (dense ? 33 : 53) * emptyRows }}>
                                     <TableCell colSpan={6} />
                                 </TableRow>
                             )}
@@ -368,7 +325,7 @@ export default function EnhancedTable() {
                 <TablePagination
                     rowsPerPageOptions={[5, 10, 25]}
                     component="div"
-                    count={rows.length}
+                    count={ticketsData.length}
                     rowsPerPage={rowsPerPage}
                     page={page}
                     onPageChange={handleChangePage}
@@ -381,4 +338,140 @@ export default function EnhancedTable() {
             />
         </Box>
     );
+}
+
+const TicketRow = ({ row, handleClick, isItemSelected, labelId }) => {
+    const [tktData, setTktData] = React.useState(null);
+    const [open, setOpen] = React.useState(false);
+
+    React.useEffect(() => {
+        const fetchTktData = async () => {
+            try {
+                const response = await axios.get(`${BASE_URL}/ticket/ticketFullData/${row.ticket_id}`);
+                setTktData(response.data[0]);
+            } catch (error) { console.log(error); }
+        };
+        fetchTktData();
+    }, [row]);
+
+    const handleShowInfo = async () => {
+        setOpen(!open);
+    }
+
+    return (
+        <React.Fragment>
+            {tktData && (
+                <>
+                    <TableRow
+                        hover
+                        aria-checked={isItemSelected}
+                        tabIndex={-1}
+                        key={row.id}
+                        selected={isItemSelected}
+                        sx={{ cursor: 'pointer', '& > *': { borderBottom: 'unset' } }}
+                    >
+                        <TableCell padding="checkbox">
+                            <Checkbox
+                                color="primary"
+                                checked={isItemSelected}
+                                inputProps={{ 'aria-labelledby': labelId }}
+                                role="checkbox"
+                                onClick={(event) => handleClick(event, row.ticket_id)}
+
+                            />
+                        </TableCell>
+                        <TableCell component="th" id={labelId} scope="row" padding="none">{tktData.bnf_name}</TableCell>
+                        <TableCell>{tktData.company}</TableCell>
+                        <TableCell>{tktData.designation}</TableCell>
+                        <TableCell>{tktData.ticket_number}</TableCell>
+                        <TableCell className='d-flex gap-2'>
+                            <button className="btn p-0 btn-outline-info btn-sm w-33" onClick={handleShowInfo}> <FontAwesomeIcon icon={faInfo} /> </button>
+                            <button className="btn p-0 btn-outline-danger btn-sm w-33"> <FontAwesomeIcon icon={faHandshake} /> </button>
+                            <button className="btn p-0 btn-outline-success btn-sm w-33"> <FontAwesomeIcon icon={faChair} /> </button>
+                        </TableCell>
+                    </TableRow>
+
+                    <TableRow style={{ border: "0px" }}>
+                        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={12}>
+                            <Collapse in={open} timeout="auto" unmountOnExit className='p-4'>
+                                <Typography className='txtClrSecondary' variant="h6" gutterBottom component="h6"> {tktData.ticket_number} </Typography>
+                                <div className="row">
+                                    <div className="col-md-7">
+                                        <Box>
+                                            <div className="shadow-sm rounded-3 mb-2">
+                                                <p className="textAccent fw-medium p-3 bg-light"> Personal Details: </p>
+                                                <div className="p-3">
+                                                    {
+                                                        [
+                                                            { label: "Name", val: tktData.bnf_name },
+                                                            { label: "Company", val: tktData.company },
+                                                            { label: "Designation", val: tktData.designation },
+                                                            { label: "Email", val: tktData.email },
+                                                            { label: "Mobile Number", val: tktData.mobile_number },
+                                                            { label: "Purpose", val: tktData.purpose }
+                                                        ].map((item, idx) => (
+                                                            <p key={idx}    >
+                                                                <span className='fw-medium'> {item.label} : </span>
+                                                                <span className="">{item.val}</span>
+                                                            </p>
+                                                        ))
+                                                    }
+                                                </div>
+                                            </div>
+                                            <div className="shadow-sm rounded-3 my-2">
+                                                <p className="textAccent fw-medium p-3 bg-light"> Billing Details: </p>
+                                                <div className="p-3">
+                                                    {
+                                                        [
+                                                            { label: "Order Time", val: tktData.order_time },
+                                                            { label: "Subtotal Amount", val: tktData.order_subtotal_amount },
+                                                            { label: "Order Coupon Code Applied", val: tktData.order_coupon_code_applied },
+                                                            { label: "Order Coupon Code Discount", val: tktData.order_coupon_code_discount },
+                                                            { label: "Order Total Amount", val: tktData.order_total_amount }
+                                                        ].map((item, idx) => (
+                                                            <p key={idx}>
+                                                                <span className='fw-medium'> {item.label} : </span>
+                                                                <span className="">{item.val}</span>
+                                                            </p>
+                                                        ))
+                                                    }
+                                                </div>
+                                            </div>
+                                            <div className="shadow-sm rounded-3 my-2">
+                                                <p className="textAccent fw-medium p-3 bg-light"> Payment Details: </p>
+                                                <div className="p-3 overflow-hidden">
+                                                    {
+                                                        [
+                                                            { label: "RZP Order ID", val: tktData.rzp_order_id },
+                                                            { label: "RZP Payment ID", val: tktData.rzp_payment_id },
+                                                            { label: "RZP Signature", val: tktData.rzp_signature }
+                                                        ].map((item, idx) => (
+                                                            <p key={idx}>
+                                                                <span className='fw-medium'> {item.label} : </span>
+                                                                <span className="">{item.val}</span>
+                                                            </p>
+                                                        ))
+                                                    }
+                                                </div>
+                                            </div>
+                                        </Box>
+                                    </div>
+                                    <div className="col-md-5">
+                                        <div className="shadow-sm rounded-3 mb-2">
+                                            <p className="textAccent fw-medium p-3 bg-light d-flex-cb"> <span> Seating Details: </span> <span className='fw-bold txtClrSecondary'> ST1S2 </span> </p>
+                                            <div className="p-3 overflow-hidden">
+                                                <p>  </p>
+                                                <p> Table No: 1 </p>
+                                                <p> Seat No: 2 </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Collapse>
+                        </TableCell>
+                    </TableRow>
+                </>
+            )}
+        </React.Fragment>
+    )
 }

@@ -5,9 +5,7 @@ const phoneId = process.env.WTSP_PHONE_NUMBER_ID;
 const accessTokenKey = process.env.WTSP_PERM_ACCESS_TOKEN_KEY;
 
 async function sendWtspSeatingTblAssigned(msgData) {
-  const {userMobileNumber, ticketQrImageLink, ticketNumber, name, tableNo, seatNo, fullSeat} = msgData;
-  console.log(msgData);
-  
+  const {userMobileNumber, ticketQrImageLink, ticketNumber, name, tableNo, seatNo, fullSeat} = msgData;  
 
   const data = {
     messaging_product: 'whatsapp',

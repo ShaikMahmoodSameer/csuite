@@ -8,8 +8,8 @@ const getSeatingTables = (callback) => {
 }
 const addSeatingTable = (newSeatingTable, callback) => {
     pool.query(
-        'INSERT INTO seating_tables (seating_table_no, no_of_seats) VALUES (?,?)', 
-        [newSeatingTable.tableNumber, newSeatingTable.noOfSeats], 
+        'INSERT INTO seating_tables (seating_table_no, table_no, no_of_seats) VALUES (?,?,?)', 
+        [newSeatingTable.tableNumber, newSeatingTable.tableNo, newSeatingTable.noOfSeats], 
         (error, response) => {
         callback(error, response);
     })
@@ -22,7 +22,7 @@ const getTableGuests = (newSeatingTable, callback) => {
     })
 }
 const addGuestsToSeatingTable = (reqData, callback) => {
-    const {selectedGuests, tableNumber} = reqData;
+    const {selectedGuests, tableNumber, tableNo} = reqData;
     pool.query('SELECT COUNT(*) AS num_rows FROM seating_table_guests WHERE seating_table_id = ?', [tableNumber], (error, response) => {
         if (error) {
             console.log(error);
@@ -34,8 +34,8 @@ const addGuestsToSeatingTable = (reqData, callback) => {
                 const seatNumber = `ST${tableNumber}S${noOfGuestPresentInTable+index+1}`
                 return new Promise((resolve, reject) => {
                     pool.query(
-                        'INSERT INTO seating_table_guests (guest_id, seating_table_id, seat, seat_no) VALUES (?,?,?,?)',
-                        [bnf_id, tableNumber, seatNumber, noOfGuestPresentInTable+index+1],
+                        'INSERT INTO seating_table_guests (guest_id, seating_table_id, seat, table_no, seat_no) VALUES (?,?,?,?,?)',
+                        [bnf_id, tableNumber, seatNumber, tableNo, noOfGuestPresentInTable+index+1],
                         (error, response) => {
                             if (error) { reject(error); } else { resolve(response); }
                         }
@@ -96,8 +96,8 @@ const addGuestsToSeatingSofa = (reqData, callback) => {
                     const seatNumber = `SS${sofaNumber}S${noOfGuestPresentInSofa+index+1}`
                     return new Promise((resolve, reject) => {
                         pool.query(
-                            `INSERT INTO seating_sofa_guests (guest_id, seating_sofa_id, seat, seat_no) VALUES (?,?,?,?)`,
-                            [bnf_id, sofaId, seatNumber, index+1],
+                            `INSERT INTO seating_sofa_guests (guest_id, seating_sofa_id, seat, sofa_no, seat_no) VALUES (?,?,?,?,?)`,
+                            [bnf_id, sofaId, seatNumber, sofaNumber, index+1],
                             (error, response) => {
                                 if (error) {
                                     reject(error);
@@ -125,6 +125,28 @@ const getSofaGuestInfo = (insertId) => {
     });
 };
 
+const getStngInfoByGid = (guestId, callback) => {
+    pool.query(`SELECT * FROM seating_table_guests WHERE guest_id = ${guestId}`, 
+    (err, res) => {
+        if (err) { callback(err, null) }
+        else if (res.length === 0) {
+            pool.query(`SELECT * FROM seating_sofa_guests WHERE guest_id = ${guestId}`,
+            (err2, res2) => {
+                if(err2) { callback(err2, null) }
+                else if (res2.length === 0){
+                    callback(null, res2);
+                } else {
+                    res2[0].seating_type = "sofa";
+                    callback(null, res2);
+                }
+            });
+        } else {
+            res[0].seating_type = "table";
+            callback(null, res)
+        }
+    });
+};
+
 
 module.exports = {
     // tables
@@ -139,5 +161,7 @@ module.exports = {
     addGuestsToSeatingSofa,
     //----- 
     getTblGuestInfo,
-    getSofaGuestInfo
+    getSofaGuestInfo,
+    //----- 
+    getStngInfoByGid
 }

@@ -41,6 +41,16 @@ const getTktInfo = async (req, res) => {
     })
 }
 
+const fetchTicketData = async (req, res) => {
+    const { ticketId } = req.params;
+
+    ticketServices.fetchTicketData(ticketId, (error, response) => {
+        if (error) handleError("err at ticket info fetching:", res, error);
+
+        res.status(200).json(response);
+    })
+}
+
 const getBenificairyDetails = async (req, res) => {
     const { bnfId } = req.params;
 
@@ -76,6 +86,7 @@ module.exports = {
     getTicketPrice,
     SetNewPrice,
     getTktInfo,
+    fetchTicketData,
     getBenificairyDetails,
     getBillingDetails,
     getPaymentDetails

@@ -116,6 +116,15 @@ const addGuestsToSeatingSofa = (req, res) => {
     })
 }
 
+const getStngInfoByGid = (req, res) => {
+    const { guestId } = req.params;
+    seatingServices.getStngInfoByGid(guestId, (error, response) => {
+        if (error) return handleErrorLog("Error at fetching Seating Details by Guest Id:", error);
+
+        if (response){ res.status(200).json(response) }
+    })
+}
+
 module.exports = {
     // tables
     getSeatingTables,
@@ -126,5 +135,7 @@ module.exports = {
     getSeatingSofas,
     addSeatingSofa,
     getSofaGuests,
-    addGuestsToSeatingSofa
+    addGuestsToSeatingSofa,
+    // -----
+    getStngInfoByGid
 }

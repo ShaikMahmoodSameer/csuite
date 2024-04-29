@@ -60,7 +60,8 @@ const verifyOTP = async (req, res) => {
             const tokenPayload = { sub: userId };
             const token = jwt.sign(tokenPayload, privateKey, { expiresIn: "1h" });
             res.cookie('token', token);
-            return res.json({ Status: "Verified", userId: userId });
+            // return res.json({ Status: "Verified", userId: userId });
+            return res.json({ Status: "Verified" });
         } else {
             return res.status(200).json({ Status: "wrongOTP" });
         }

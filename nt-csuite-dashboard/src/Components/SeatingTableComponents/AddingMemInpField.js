@@ -7,7 +7,7 @@ import Button from '@mui/material/Button';
 import axios from 'axios';
 import BASE_URL from '../../config/apiConfig';
 
-const AddingMemInpField = ({ fetchTableGuests, tableNumber, tableMaxSeats, tableMembers, allGuests }) => {
+const AddingMemInpField = ({ fetchTableGuests, tableNumber, tableNo, tableMaxSeats, tableMembers, allGuests }) => {
     const [selectedGuests, setSelectedGuests] = useState([]);
     const [unseatedGuests, setUnseatedGuests ] = useState([]);
 
@@ -28,7 +28,8 @@ const AddingMemInpField = ({ fetchTableGuests, tableNumber, tableMaxSeats, table
             try {
                 const response = await axios.post(`${BASE_URL}/admin/seatings/add-guests-to-table`, { params: {
                     selectedGuests: selectedGuests,
-                    tableNumber: tableNumber
+                    tableNumber: tableNumber,
+                    tableNo: tableNo
                 }});
                 if(response.data.Status === "Success"){
                     fetchTableGuests(tableNumber);
